@@ -75,25 +75,26 @@ getByTestId()
 ```
 CSS/XPath
 # 8. Difference between locator() and $
-locator()
+```locator()```
 Lazy evaluation
 Auto wait
 Retry
 Recommended
-page.$()
+```page.$()```
 Returns ElementHandle
 No retry
 Deprecated approach
 # 9. Difference between fill() and type()
-fill()
-
+```fill()```
 Clears textbox first
-type()
+```type()```
 Types character by character
 # 10. Difference between click() and dblclick()
+```
 await locator.click();
 await locator.dblclick();
-Intermediate Questions
+```
+## Intermediate Questions
 # 11. How does Playwright handle synchronization?
 Using
 
