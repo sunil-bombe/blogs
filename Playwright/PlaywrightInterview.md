@@ -295,6 +295,7 @@ await expect.soft(locator)
 Execution continues even if the assertion fails.
 
 ## Coding Questions
+
 # Reverse string
 ```typescript 
 function reverse(str){
