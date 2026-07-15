@@ -486,62 +486,137 @@ Subject
 Sender
 OTP
 Verification link
-10. How do you debug a flaky Playwright test?
-My debugging approach:
+# 10. How do you debug a flaky Playwright test?
 
-Step 1
-Run headed
+Debugging flaky tests requires a systematic approach to identify the root cause instead of simply adding retries. Below is the step-by-step process I follow.
 
+---
+
+## Step 1: Run the Test in Headed Mode
+
+Running the test in headed mode allows you to visually observe the browser behavior and identify where the test is failing.
+
+```bash
 npx playwright test --headed
-Step 2
-Run in debug mode
+```
 
+---
+
+## Step 2: Run the Test in Debug Mode
+
+Debug mode pauses the execution, allowing you to inspect each action interactively.
+
+```bash
 npx playwright test --debug
-Step 3
-Trace Viewer
+```
 
+---
+
+## Step 3: Analyze the Trace Using Trace Viewer
+
+Playwright's Trace Viewer provides a detailed timeline of actions, screenshots, network requests, and DOM snapshots.
+
+```bash
 npx playwright show-trace trace.zip
-Step 4
-Record video
+```
 
-use:{
-video:'retain-on-failure'
+---
+
+## Step 4: Record Videos for Failed Tests
+
+Enable video recording to review test execution after failures.
+
+```typescript
+use: {
+  video: 'retain-on-failure'
 }
-Step 5
-Capture screenshots
+```
 
+---
+
+## Step 5: Capture Screenshots
+
+Take screenshots at critical points or when a test fails.
+
+```typescript
 await page.screenshot({
-path:'failed.png'
+  path: 'failed.png'
 });
-Step 6
-Check network requests
+```
 
+---
+
+## Step 6: Inspect Network Requests and Responses
+
+Monitor API calls to detect slow or failed network requests.
+
+```typescript
 page.on('request', request => {
-    console.log(request.url());
+  console.log(request.url());
 });
+
 page.on('response', response => {
-    console.log(response.status(), response.url());
+  console.log(response.status(), response.url());
 });
-Step 7
-Inspect logs and console errors
+```
 
-page.on('console', msg => console.log(msg.text()));
-page.on('pageerror', error => console.log(error.message));
-Step 8
-Look for common causes
+---
 
-Unstable locators
-Hard waits (waitForTimeout)
-Missing assertions
-Race conditions
-Slow API responses
-Shared test data
-Tests that depend on execution order
-Interview Summary (2-minute answer)
-If asked, “How do you debug flaky tests?”, you can answer:
+## Step 7: Capture Browser Console Logs and Errors
 
-“I first reproduce the issue by running the test in headed and debug mode. Then I use Playwright Trace Viewer, videos, screenshots, browser console logs, and network logs to identify where it fails. I verify whether the failure is due to unstable locators, synchronization issues, slow APIs, or shared test data. I replace hard waits with Playwright’s auto-waiting and assertion mechanisms, use resilient locators like getByRole or getByTestId, and isolate tests to ensure they are independent. This systematic approach helps eliminate flakiness rather than just masking it with retries."
+Console logs and JavaScript errors often reveal application-side issues.
 
+```typescript
+page.on('console', msg => {
+  console.log(msg.text());
+});
+
+page.on('pageerror', error => {
+  console.log(error.message);
+});
+```
+
+---
+
+## Step 8: Check for Common Causes of Flaky Tests
+
+The most common reasons include:
+
+- ❌ Unstable or dynamic locators
+- ❌ Hard waits (`waitForTimeout()`)
+- ❌ Missing assertions
+- ❌ Race conditions
+- ❌ Slow API responses
+- ❌ Shared or inconsistent test data
+- ❌ Tests that depend on execution order
+- ❌ Timing or synchronization issues
+
+---
+
+# Best Practices to Reduce Flakiness
+
+- ✅ Prefer Playwright's **auto-waiting** over hard waits.
+- ✅ Use resilient locators such as:
+  - `getByRole()`
+  - `getByTestId()`
+  - `getByLabel()`
+- ✅ Keep tests independent and isolated.
+- ✅ Mock unstable external APIs when appropriate.
+- ✅ Use explicit assertions with Playwright's `expect()`.
+- ✅ Avoid shared state between tests.
+- ✅ Retry only after identifying and fixing the root cause.
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How do you debug flaky Playwright tests?*
+
+**Answer:**
+
+> "I first reproduce the issue by running the test in headed mode and then in debug mode to observe exactly where it fails. Next, I use Playwright Trace Viewer to analyze each action, along with videos and screenshots for failed executions. I also inspect browser console logs, JavaScript errors, and network requests to identify any application or API-related issues.
+>
+> After gathering the evidence, I check for common causes such as unstable locators, synchronization issues, hard waits, race conditions, slow API responses, or shared test data. I replace hard waits with Playwright's built-in auto-waiting and assertions, use reliable locators like `getByRole()` or `getByTestId()`, and ensure each test is independent. This systematic approach helps eliminate flaky tests by addressing the root cause instead of simply masking failures with retries."
 
 
 
