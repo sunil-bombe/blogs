@@ -6,11 +6,11 @@ Playwright is an open-source end-to-end automation framework developed by Micros
 PlaywrightSeleniumAuto waitsManual waits often neededFasterComparatively slowerMultiple browser contextsRequires separate browser instancesBuilt-in network mockingLimited supportBetter handling of modern SPAsMore configuration neededSupports Chromium, Firefox, WebKitBrowser driver dependent
 
 # 3. Which browsers does Playwright support?
-Chromium
-Firefox
-WebKit
-Google Chrome
-Microsoft Edge
+- Chromium
+- Firefox
+- WebKit
+- Google Chrome
+- Microsoft Edge
 # 4. Difference between Browser, BrowserContext and Page?
 Browser
 
@@ -31,7 +31,7 @@ Browser
    |-- Context2
           |
           |-- Page1
-5. What is auto waiting?
+# 5. What is auto waiting?
 Playwright automatically waits for:
 
 Element attached
@@ -44,7 +44,7 @@ Example:
 await page.getByRole('button').click();
 No explicit wait required.
 
-6. What are Locators?
+# 6. What are Locators?
 Locators are Playwright's recommended way to find elements.
 
 Examples
@@ -60,7 +60,7 @@ page.getByLabel()
 page.getByPlaceholder()
 
 page.getByTestId()
-7. Which locator is preferred?
+# 7. Which locator is preferred?
 Priority
 
 getByRole()
@@ -69,7 +69,7 @@ getByPlaceholder()
 getByText()
 getByTestId()
 CSS/XPath
-8. Difference between locator() and $
+# 8. Difference between locator() and $
 locator()
 Lazy evaluation
 Auto wait
@@ -79,17 +79,17 @@ page.$()
 Returns ElementHandle
 No retry
 Deprecated approach
-9. Difference between fill() and type()
+# 9. Difference between fill() and type()
 fill()
 
 Clears textbox first
 type()
 Types character by character
-10. Difference between click() and dblclick()
+# 10. Difference between click() and dblclick()
 await locator.click();
 await locator.dblclick();
 Intermediate Questions
-11. How does Playwright handle synchronization?
+# 11. How does Playwright handle synchronization?
 Using
 
 Auto waiting
@@ -97,7 +97,7 @@ expect()
 waitForSelector()
 waitForURL()
 waitForLoadState()
-12. What are different wait methods?
+# 12. What are different wait methods?
 waitForSelector()
 waitForLoadState()
 waitForTimeout()
@@ -105,41 +105,41 @@ waitForURL()
 waitForEvent()
 waitForResponse()
 waitForRequest()
-13. Why avoid waitForTimeout()?
+# 13. Why avoid waitForTimeout()?
 Hard waits
 
 Slow execution
 Flaky tests
-14. Difference between waitForSelector() and expect()
+# 14. Difference between waitForSelector() and expect()
 await page.waitForSelector('#msg');
 Only waits.
 
 await expect(locator).toBeVisible();
 Waits + verifies.
 
-15. How to upload a file?
+# 15. How to upload a file?
 await page.setInputFiles('input', 'sample.pdf');
-16. Handle multiple tabs
+# 16. Handle multiple tabs
 const pagePromise = context.waitForEvent('page');
 await page.click('#open');
 const newPage = await pagePromise;
-17. Handle alerts
+# 17. Handle alerts
 page.on('dialog', async dialog => {
    await dialog.accept();
 });
-18. Handle frames
+# 18. Handle frames
 const frame =
 page.frameLocator('#frame');
 await frame.locator('#name').fill('Sunil');
-19. Handle dropdown
+# 19. Handle dropdown
 await locator.selectOption('India');
-20. Handle dynamic elements?
+# 20. Handle dynamic elements?
 Smart locators
 Auto waiting
 Relative locators
 Retry assertions
 Advanced Questions
-21. Explain Browser Context.
+# 21. Explain Browser Context.
 Each context is an isolated session.
 
 Useful for
@@ -147,19 +147,19 @@ Useful for
 Parallel execution
 Multiple users
 Incognito sessions
-22. API Testing in Playwright
+# 22. API Testing in Playwright
 const request =
 await playwright.request.newContext();
 const response =
 await request.get(url);
-23. Mock API Response
+# 23. Mock API Response
 await page.route(
 '**/users',
 route => route.fulfill({
 status:200,
 body:JSON.stringify(data)
 }));
-24. Block Network Calls
+# 24. Block Network Calls
 await page.route(
 '**/*.png',
 route => route.abort()
