@@ -43,14 +43,16 @@ Enabled
 Receives events
 Example:
 
-``` await page.getByRole('button').click(); ```
+```typescript
+ await page.getByRole('button').click();
+```
 No explicit wait required.
 
 # 6. What are Locators?
 Locators are Playwright's recommended way to find elements.
 
 Examples
-```
+```typescript
 page.locator()
 
 page.getByRole()
@@ -75,35 +77,45 @@ getByTestId()
 ```
 CSS/XPath
 # 8. Difference between locator() and $
-```locator()```
+```typescript
+locator()
+```
 Lazy evaluation
 Auto wait
 Retry
 Recommended
-```page.$()```
+```typescript
+page.$()
+```
 Returns ElementHandle
 No retry
 Deprecated approach
 # 9. Difference between fill() and type()
-```fill()```
+```typescript
+fill()
+```
 Clears textbox first
-```type()```
+```typescript
+type()
+```
 Types character by character
 # 10. Difference between click() and dblclick()
-```
+```typescript
 await locator.click();
 await locator.dblclick();
 ```
 ## Intermediate Questions
 # 11. How does Playwright handle synchronization?
 Using
-
+```typescript
 Auto waiting
 expect()
 waitForSelector()
 waitForURL()
 waitForLoadState()
+```
 # 12. What are different wait methods?
+```typescript
 waitForSelector()
 waitForLoadState()
 waitForTimeout()
@@ -111,34 +123,47 @@ waitForURL()
 waitForEvent()
 waitForResponse()
 waitForRequest()
+```
 # 13. Why avoid waitForTimeout()?
-Hard waits
-
-Slow execution
-Flaky tests
+- Hard waits
+- Slow execution
+- Flaky tests
 # 14. Difference between waitForSelector() and expect()
+```typescript
 await page.waitForSelector('#msg');
+```
 Only waits.
-
+```typescript
 await expect(locator).toBeVisible();
+```
 Waits + verifies.
 
 # 15. How to upload a file?
+```typescript
 await page.setInputFiles('input', 'sample.pdf');
+```
 # 16. Handle multiple tabs
+```typescript
 const pagePromise = context.waitForEvent('page');
 await page.click('#open');
 const newPage = await pagePromise;
+```
 # 17. Handle alerts
+```typescript
 page.on('dialog', async dialog => {
    await dialog.accept();
 });
+```
 # 18. Handle frames
+```typescript
 const frame =
 page.frameLocator('#frame');
 await frame.locator('#name').fill('Sunil');
+```
 # 19. Handle dropdown
+```typescript
 await locator.selectOption('India');
+```
 # 20. Handle dynamic elements?
 Smart locators
 Auto waiting
@@ -146,67 +171,79 @@ Relative locators
 Retry assertions
 Advanced Questions
 # 21. Explain Browser Context.
-Each context is an isolated session.
-
-Useful for
-
-Parallel execution
-Multiple users
-Incognito sessions
+- Each context is an isolated session.
+- Useful for
+- Parallel execution
+- Multiple users
+- Incognito sessions
 # 22. API Testing in Playwright
+```typescript
 const request =
 await playwright.request.newContext();
 const response =
 await request.get(url);
+```
 # 23. Mock API Response
+```typescript
 await page.route(
 '**/users',
 route => route.fulfill({
 status:200,
 body:JSON.stringify(data)
 }));
+```
 # 24. Block Network Calls
+```typescript
 await page.route(
 '**/*.png',
 route => route.abort()
 );
-25. Capture Screenshot
+```
+# 25. Capture Screenshot
+```typescript
 await page.screenshot({
 path:'home.png'
 });
-26. Record Video
+```
+# 26. Record Video
+```typescript
 use:{
 video:'on'
 }
-27. Trace Viewer
+```
+# 27. Trace Viewer
+```typescript
 use:{
 trace:'on-first-retry'
 }
+```
 Open
-
+```bash
 npx playwright show-trace trace.zip
-28. Retry Failed Tests
+```
+# 28. Retry Failed Tests
 retries:2
-29. Parallel Execution
+# 29. Parallel Execution
 workers:4
-30. Serial Execution
+# 30. Serial Execution
+```typescript
 test.describe.configure({
 mode:'serial'
 });
-Framework Questions
-31. Explain your Playwright framework architecture.
+```
+## Framework Questions
+# 31. Explain your Playwright framework architecture.
 Mention:
-
-Page Object Model
-Fixtures
-Utilities
-Config
-Test Data
-API Layer
-Reports
-CI/CD
-Logger
-32. How do you manage test data?
+- Page Object Model
+- Fixtures
+- Utilities
+- Config
+- Test Data
+- API Layer
+- Reports
+- CI/CD
+- Logger
+# 32. How do you manage test data?
 JSON
 CSV
 Excel
