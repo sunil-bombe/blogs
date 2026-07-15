@@ -21,7 +21,7 @@ Incognito session.
 Multiple contexts can exist in one browser.
 Page
 A single browser tab.
-Browser
+```Browser
    |
    |-- Context1
    |      |
@@ -31,6 +31,7 @@ Browser
    |-- Context2
           |
           |-- Page1
+          ```
 # 5. What is auto waiting?
 Playwright automatically waits for:
 
