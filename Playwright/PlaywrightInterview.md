@@ -43,14 +43,14 @@ Enabled
 Receives events
 Example:
 
-await page.getByRole('button').click();
+``` await page.getByRole('button').click(); ```
 No explicit wait required.
 
 # 6. What are Locators?
 Locators are Playwright's recommended way to find elements.
 
 Examples
-
+```
 page.locator()
 
 page.getByRole()
@@ -62,14 +62,17 @@ page.getByLabel()
 page.getByPlaceholder()
 
 page.getByTestId()
+```
+
 # 7. Which locator is preferred?
 Priority
-
+```
 getByRole()
 getByLabel()
 getByPlaceholder()
 getByText()
 getByTestId()
+```
 CSS/XPath
 # 8. Difference between locator() and $
 locator()
