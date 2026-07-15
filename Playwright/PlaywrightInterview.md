@@ -311,218 +311,1084 @@ Remove duplicates
 [...new Set(arr)]
 Sort numbers
 arr.sort((a,b)=>a-b);
-Scenario-Based Questions
-How would you automate OTP login?
-How would you test file downloads?
-How do you handle CAPTCHA in automation?
-How would you automate infinite scrolling?
-How would you test a table with 10,000 rows?
-How would you test a React application?
-How do you handle shadow DOM?
-How do you test WebSockets?
-How do you verify emails received after registration?
-How do you debug a flaky Playwright test?
-1. How would you automate OTP login?
-Expected Answer
-OTP should not be automated by reading the actual SMS or email in UI automation because it depends on external systems and makes tests flaky.
+# Scenario-Based Playwright Interview Questions
 
-Instead, I would use one of these approaches:
+1. **How would you automate OTP login?**
+2. **How would you test file downloads?**
+3. **How do you handle CAPTCHA in automation?**
+4. **How would you automate infinite scrolling?**
+5. **How would you test a table with 10,000 rows?**
+6. **How would you test a React application?**
+7. **How do you handle Shadow DOM?**
+8. **How do you test WebSockets?**
+9. **How do you verify emails received after registration?**
+10. **How do you debug a flaky Playwright test?**
 
-Approach 1 (Preferred) — Test Environment Bypass
-Ask developers to provide:
+# 1. How would you automate OTP login?
 
-Static OTP
-API to fetch OTP
-Disable OTP in QA
-Test-only authentication endpoint
-This is the most reliable approach.
+One-Time Password (OTP) authentication is commonly used as a second factor of authentication. While it is an important feature to test, **reading the actual SMS or email during UI automation is generally not recommended** because it introduces dependencies on external systems, making tests slow and flaky.
 
-Approach 2 — Read OTP from Database
-If OTP is stored in DB:
+The preferred approach is to use test-specific mechanisms provided by the application or backend.
 
+---
+
+## Why Not Read the Actual SMS or Email?
+
+Automating OTP by reading real SMS or email can lead to:
+
+- ❌ Dependency on third-party services
+- ❌ Slow and unreliable test execution
+- ❌ Network and delivery delays
+- ❌ Difficult test maintenance
+- ❌ Flaky tests due to external failures
+
+---
+
+## Approach 1: Test Environment Bypass (Recommended ✅)
+
+The best practice is to ask developers to provide test-friendly authentication mechanisms, such as:
+
+- ✅ Static OTP
+- ✅ API to fetch the latest OTP
+- ✅ Disable OTP validation in the QA environment
+- ✅ Test-only authentication endpoint
+- ✅ Feature flag to bypass OTP verification
+
+This is the most reliable and maintainable approach for automated testing.
+
+---
+
+## Approach 2: Read OTP from the Database
+
+If the OTP is stored in the database and your test environment allows database access, retrieve it directly.
+
+```typescript
 const otp = await getOtpFromDB(phoneNumber);
+
 await page.getByLabel('OTP').fill(otp);
-Approach 3 — Read OTP from Email
-Using Gmail API or MailSlurp.
+```
 
+---
+
+## Approach 3: Read OTP from Email
+
+If the OTP is sent via email, retrieve it using an email service such as:
+
+- 📧 MailSlurp
+- 📧 Gmail API
+- 📧 MailHog
+- 📧 Mailtrap
+
+Example:
+
+```typescript
 const otp = await mailSlurp.getLatestOTP();
-Approach 4 — Read OTP from SMS Service
-Twilio API
 
-AWS SNS
+await page.getByLabel('OTP').fill(otp);
+```
 
-MessageBird
+---
 
-Interview Tip
+## Approach 4: Read OTP from an SMS Service
 
-“I avoid UI automation of actual SMS because it creates dependency on third-party services. I prefer backend APIs or test hooks.”
+If the application sends OTPs via SMS, integrate with the SMS provider's API to retrieve the message.
 
-2. How would you test file downloads?
-Playwright provides download events.
+Common providers include:
 
-const downloadPromise =
-page.waitForEvent('download');
+- 📱 Twilio
+- 📱 AWS SNS
+- 📱 MessageBird
+
+Example workflow:
+
+```text
+Generate OTP
+      │
+      ▼
+SMS Service
+      │
+      ▼
+Retrieve OTP via API
+      │
+      ▼
+Enter OTP in Application
+```
+
+---
+
+## What to Validate
+
+When testing OTP authentication, verify:
+
+- ✅ OTP is generated successfully.
+- ✅ OTP is delivered through the expected channel.
+- ✅ Valid OTP allows successful login.
+- ✅ Invalid OTP displays an appropriate error message.
+- ✅ Expired OTP is rejected.
+- ✅ OTP cannot be reused.
+- ✅ Maximum retry attempts are enforced.
+- ✅ Resend OTP functionality works correctly.
+
+---
+
+## Best Practices
+
+- ✅ Prefer backend APIs or test hooks over reading real SMS.
+- ✅ Keep UI automation independent of third-party services.
+- ✅ Use disposable test accounts and test data.
+- ✅ Test OTP expiry and invalid OTP scenarios.
+- ✅ Validate resend OTP functionality.
+- ✅ Avoid hard-coded waits; use event-driven or API-based synchronization.
+
+---
+
+## Interview Tip
+
+> **Avoid automating the actual SMS or email delivery in UI tests because it introduces dependencies on external systems. Instead, use backend APIs, database access, test hooks, or dedicated test endpoints to retrieve or bypass the OTP in QA environments.**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How would you automate OTP login?*
+
+**Answer:**
+
+> "I generally avoid automating OTP by reading the actual SMS or email because it depends on external services and can make tests flaky. The preferred approach is to use a test-specific mechanism, such as a static OTP, a backend API to retrieve the OTP, a test authentication endpoint, or disabling OTP validation in the QA environment. If those options aren't available, I can retrieve the OTP from the database, an email service like MailSlurp or the Gmail API, or an SMS provider such as Twilio. This approach keeps the automation reliable while still validating the application's authentication flow."
+
+# 2. How would you test file downloads?
+
+Playwright provides built-in support for handling file downloads through the **`download`** event. This makes it easy to wait for a download, save the file, and validate its properties.
+
+---
+
+## Download Flow
+
+```text
+Click Download Button
+        │
+        ▼
+Wait for Download Event
+        │
+        ▼
+Save the File
+        │
+        ▼
+Validate File
+```
+
+---
+
+## Example
+
+Wait for the download event before clicking the download button.
+
+```typescript
+const downloadPromise = page.waitForEvent('download');
+
 await page.click('text=Download');
-const download =
-await downloadPromise;
+
+const download = await downloadPromise;
+
 await download.saveAs('downloads/report.pdf');
-Validate
+```
 
-File exists
-File name
-File size
-Extension
-Content
-Example
+---
 
-expect(download.suggestedFilename())
-.toContain('.pdf');
-3. How do you handle CAPTCHA?
-Never automate CAPTCHA.
+## What to Validate
 
-CAPTCHA exists specifically to prevent automation.
+After downloading the file, verify the following:
 
-Instead use
+- ✅ File exists
+- ✅ File name
+- ✅ File extension
+- ✅ File size
+- ✅ File content
+- ✅ MIME type (if applicable)
+- ✅ Download completed successfully
 
-Disable CAPTCHA in QA
-Test bypass token
-Whitelist automation IP
-Mock CAPTCHA validation
-If interviewer insists
+---
 
-Google reCAPTCHA provides test keys.
+## Validate File Name
 
-Good interview answer
+```typescript
+expect(download.suggestedFilename()).toContain('.pdf');
+```
 
-“CAPTCHA itself shouldn’t be automated. In QA we normally bypass it or mock its validation.”
+---
 
-4. How would you automate infinite scrolling?
-Keep scrolling until no more content loads.
+## Validate File Exists
 
+```typescript
+import fs from 'fs';
+
+expect(fs.existsSync('downloads/report.pdf')).toBeTruthy();
+```
+
+---
+
+## Validate File Size
+
+```typescript
+const stats = fs.statSync('downloads/report.pdf');
+
+expect(stats.size).toBeGreaterThan(0);
+```
+
+---
+
+## Validate File Content
+
+For text-based files, read the contents and verify the expected data.
+
+```typescript
+const content = fs.readFileSync(
+  'downloads/report.pdf'
+);
+
+// Perform content validation as needed.
+```
+
+> **Note:** For PDF files, you can use a PDF parsing library (such as `pdf-parse`) to extract and verify the text content.
+
+---
+
+## Best Practices
+
+- ✅ Always wait for the `download` event before clicking the download button.
+- ✅ Save downloaded files to a dedicated test directory.
+- ✅ Validate the file name, extension, and size.
+- ✅ Verify the file content whenever possible.
+- ✅ Clean up downloaded files after test execution.
+- ✅ Avoid fixed delays; rely on Playwright's event handling.
+
+---
+
+## Common Test Scenarios
+
+- Verify the correct file is downloaded.
+- Verify the downloaded file has the expected name.
+- Verify the correct file extension (`.pdf`, `.csv`, `.xlsx`, etc.).
+- Verify the file is not empty.
+- Verify the file contains the expected content.
+- Verify download behavior for unauthorized users.
+- Verify error handling when the download fails.
+
+---
+
+## Interview Tip
+
+> **Always use Playwright's `download` event instead of fixed waits. After the download completes, validate the file's existence, name, extension, size, and content to ensure it was downloaded correctly.**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How would you test file downloads in Playwright?*
+
+**Answer:**
+
+> "Playwright provides a built-in `download` event that allows me to reliably handle file downloads. I first wait for the download event, trigger the download action, and then save the file to a known location. After that, I validate that the file exists, verify its name, extension, and size, and, when applicable, check its contents to ensure the correct file was downloaded. I avoid using hard waits and rely on Playwright's event-based approach for stable and reliable download tests."
+
+# 3. How do you handle CAPTCHA?
+
+CAPTCHA is designed to distinguish humans from automated scripts. Its primary purpose is to **prevent automation**, so attempting to automate CAPTCHA defeats its purpose and is **not considered a best practice** in test automation.
+
+Instead of solving CAPTCHA during automated tests, teams typically use test-specific configurations to bypass or mock its validation in non-production environments.
+
+---
+
+## Why You Shouldn't Automate CAPTCHA
+
+- ❌ CAPTCHA is intentionally built to block automated tools.
+- ❌ Automating it makes tests unreliable and difficult to maintain.
+- ❌ Production CAPTCHAs should always remain enabled for security.
+
+---
+
+## Recommended Approaches
+
+In QA or test environments, use one of the following approaches:
+
+- ✅ Disable CAPTCHA in the QA environment.
+- ✅ Use a test bypass token provided by the application.
+- ✅ Whitelist the automation server's IP address.
+- ✅ Mock the CAPTCHA validation service.
+- ✅ Use feature flags or configuration to skip CAPTCHA during automated tests.
+
+---
+
+## Google reCAPTCHA Test Keys
+
+If the application uses **Google reCAPTCHA**, Google provides **test keys** that always return predictable results in test environments. These keys allow automation without compromising production security.
+
+> **Note:** Test keys should only be used in development or QA environments, never in production.
+
+---
+
+## What to Validate Instead
+
+Rather than testing CAPTCHA solving, verify the application's behavior:
+
+- ✅ CAPTCHA is displayed when expected.
+- ✅ Users cannot proceed without completing CAPTCHA (in production or manual testing).
+- ✅ Valid CAPTCHA responses allow the request to continue.
+- ✅ Invalid or missing CAPTCHA responses display the correct error message.
+- ✅ CAPTCHA bypass works correctly in the QA environment.
+
+---
+
+## Best Practices
+
+- ✅ Keep CAPTCHA enabled in production.
+- ✅ Bypass or mock CAPTCHA only in test environments.
+- ✅ Separate CAPTCHA validation from business logic testing.
+- ✅ Focus automation on the application's functionality, not on solving CAPTCHA challenges.
+- ✅ Use official test keys where supported.
+
+---
+
+## Interview Tip
+
+> **CAPTCHA itself should not be automated because it is specifically designed to prevent bots. In automated testing, the recommended approach is to bypass or mock CAPTCHA validation in QA environments while keeping it enabled in production.**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How do you handle CAPTCHA in automation?*
+
+**Answer:**
+
+> "I don't automate CAPTCHA because its purpose is to prevent automated access. Instead, in QA environments we typically disable CAPTCHA, use a test bypass token, whitelist the automation server's IP, or mock the CAPTCHA validation service. If the application uses Google reCAPTCHA, Google provides official test keys that can be used for automation in non-production environments. This allows us to validate the application's business functionality without compromising security or creating unstable tests."
+
+# 4. How would you automate infinite scrolling?
+
+Infinite scrolling is a UI pattern where additional content is loaded automatically as the user scrolls down the page. The automation script should continue scrolling until no new content is loaded.
+
+---
+
+## Basic Approach
+
+The general approach is:
+
+1. Scroll to the bottom of the page.
+2. Wait for new content to load.
+3. Check if the page height has increased.
+4. Repeat until the page height no longer changes.
+
+---
+
+## Example
+
+```typescript
 let previousHeight = 0;
+
 while (true) {
-const currentHeight =
-await page.evaluate(() =>
-document.body.scrollHeight);
-if(currentHeight===previousHeight)
-break;
-previousHeight=currentHeight;
-await page.evaluate(()=>
-window.scrollTo(0,document.body.scrollHeight));
-await page.waitForTimeout(1000);
+  const currentHeight = await page.evaluate(() =>
+    document.body.scrollHeight
+  );
+
+  if (currentHeight === previousHeight) {
+    break;
+  }
+
+  previousHeight = currentHeight;
+
+  await page.evaluate(() =>
+    window.scrollTo(0, document.body.scrollHeight)
+  );
+
+  await page.waitForTimeout(1000);
 }
-Better approach
+```
 
-Wait for API response instead of timeout.
+---
 
-5. How would you test a table with 10,000 rows?
-Never validate all rows.
+## Better Approach
 
-Instead
+Instead of using a fixed timeout (`waitForTimeout()`), wait for the network request or API response that loads the next set of data.
 
-Pagination testing
-Search functionality
-Sorting
-Filtering
-Random sampling
-API validation
-Example
+```typescript
+await Promise.all([
+  page.waitForResponse(response =>
+    response.url().includes('/products') &&
+    response.status() === 200
+  ),
+  page.evaluate(() =>
+    window.scrollTo(0, document.body.scrollHeight)
+  )
+]);
+```
 
-const rows =
-page.locator('table tbody tr');
-await expect(rows)
-.toHaveCount(50);
-Validate backend data instead of every UI row.
+This approach is:
 
-Interview Tip
+- ✅ Faster
+- ✅ More reliable
+- ✅ Less flaky
+- ✅ Independent of network speed
 
-“UI should validate representative data while backend/API validates the full dataset.”
+---
 
-6. How would you test a React application?
-Focus on
+## Alternative Approach
 
-Dynamic DOM updates
-Component rendering
-State changes
-API calls
-Loading spinner
-Lazy loading
-Use
+If each scroll loads additional elements, wait until the number of elements increases.
 
-getByRole()
-getByLabel()
-getByTestId()
-Avoid XPath.
+```typescript
+const items = page.locator('.product-card');
 
-React updates DOM frequently.
+const initialCount = await items.count();
 
-Use auto waiting.
+await page.evaluate(() =>
+  window.scrollTo(0, document.body.scrollHeight)
+);
 
-Interview Tip
+await expect(items).toHaveCount(initialCount + 20);
+```
 
-Prefer accessibility-based locators because they remain stable across UI changes.
+---
 
-7. How do you handle Shadow DOM?
-Playwright automatically supports open Shadow DOM.
+## What to Validate
 
-Example
+When testing infinite scrolling, verify:
 
+- ✅ New content loads after scrolling.
+- ✅ No duplicate items are displayed.
+- ✅ Items appear in the correct order.
+- ✅ Loading indicators appear and disappear correctly.
+- ✅ The scroll stops when all data has been loaded.
+- ✅ API requests are triggered as expected.
+- ✅ Performance remains acceptable with large datasets.
+
+---
+
+## Best Practices
+
+- ✅ Prefer waiting for API responses over fixed delays.
+- ✅ Avoid `waitForTimeout()` whenever possible.
+- ✅ Verify that newly loaded items are unique.
+- ✅ Validate both UI updates and backend responses.
+- ✅ Handle scenarios where no more data is available.
+- ✅ Use Playwright's built-in waiting mechanisms for better stability.
+
+---
+
+## Interview Tip
+
+> **Avoid using hard waits (`waitForTimeout()`) for infinite scrolling. Instead, wait for the API response or for new elements to appear. This makes tests faster, more reliable, and less flaky.**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How would you automate infinite scrolling in Playwright?*
+
+**Answer:**
+
+> "To automate infinite scrolling, I repeatedly scroll to the bottom of the page and check whether additional content has been loaded by comparing the page height or the number of displayed items. If no new content appears, I stop scrolling. Rather than relying on fixed delays like `waitForTimeout()`, I prefer waiting for the API response or new elements to load using Playwright's built-in waiting mechanisms. I also verify that new items are loaded correctly, there are no duplicates, the loading indicator behaves as expected, and the application stops requesting data once all content has been loaded."
+
+# 5. How would you test a table with 10,000 rows?
+
+Testing every row in a large table is inefficient, time-consuming, and unnecessary. Instead of validating all 10,000 rows through the UI, focus on testing the table's functionality and validate the complete dataset through backend or API testing.
+
+---
+
+## Why Not Validate All Rows?
+
+Validating every row:
+
+- ❌ Increases test execution time
+- ❌ Makes tests slow and brittle
+- ❌ Provides little additional value
+- ❌ Is better suited for API or database validation
+
+---
+
+## What to Test Instead
+
+Focus on the following functionality:
+
+- ✅ Pagination
+- ✅ Search functionality
+- ✅ Sorting (ascending and descending)
+- ✅ Filtering
+- ✅ Random sampling of displayed rows
+- ✅ Row selection and actions
+- ✅ Column visibility and formatting
+- ✅ API or database validation for the complete dataset
+
+---
+
+## Example: Validate Visible Rows
+
+Verify that only the expected number of rows is displayed on the current page.
+
+```typescript
+const rows = page.locator('table tbody tr');
+
+await expect(rows).toHaveCount(50);
+```
+
+For example, if pagination displays **50 rows per page**, verify only those 50 rows.
+
+---
+
+## Test Pagination
+
+Verify that navigating between pages loads the correct data.
+
+```typescript
+await page.getByRole('button', { name: 'Next' }).click();
+
+await expect(page.locator('table tbody tr')).toHaveCount(50);
+```
+
+---
+
+## Test Search
+
+Search for a known record and verify the results.
+
+```typescript
+await page.getByPlaceholder('Search').fill('John Doe');
+
+await expect(page.getByText('John Doe')).toBeVisible();
+```
+
+---
+
+## Test Sorting
+
+Verify that data is sorted correctly when clicking a column header.
+
+```typescript
+await page.getByRole('columnheader', { name: 'Name' }).click();
+
+// Validate that the displayed rows are sorted correctly.
+```
+
+---
+
+## Test Filtering
+
+Apply filters and confirm that only matching records are displayed.
+
+```typescript
+await page.getByLabel('Status').selectOption('Active');
+
+await expect(page.getByText('Inactive')).toHaveCount(0);
+```
+
+---
+
+## Validate the Backend or API
+
+Instead of validating all UI rows, verify the complete dataset through the API or database.
+
+Example:
+
+```typescript
+const response = await page.request.get('/api/users');
+
+expect(response.ok()).toBeTruthy();
+```
+
+The backend is the appropriate place to verify:
+
+- Total number of records
+- Data integrity
+- Missing or duplicate records
+- Business rules
+
+---
+
+## Best Practices
+
+- ✅ Validate only the visible rows in the UI.
+- ✅ Test pagination, sorting, filtering, and searching.
+- ✅ Use random sampling for data verification.
+- ✅ Compare selected UI records with API responses.
+- ✅ Perform full dataset validation at the API or database layer.
+- ✅ Keep UI tests focused on user functionality rather than data volume.
+
+---
+
+## Interview Tip
+
+> **"UI tests should validate representative data and user interactions, while backend or API tests should validate the complete dataset."**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How would you test a table with 10,000 rows?*
+
+**Answer:**
+
+> "I wouldn't validate all 10,000 rows through the UI because it's slow, unnecessary, and better suited for backend validation. Instead, I'd focus on testing the table's functionality, such as pagination, search, sorting, filtering, and row actions. I'd verify that the correct number of rows is displayed per page and use random sampling to compare displayed records with API responses. Finally, I'd validate the complete dataset through the API or database, where checking all records is faster and more reliable. This approach keeps UI tests efficient while ensuring complete data validation at the backend."
+
+# 6. How would you test a React application?
+
+React applications are dynamic and component-based. The UI updates automatically whenever the component state or props change, so tests should focus on user behavior rather than the underlying implementation.
+
+Playwright is well-suited for testing React applications because it provides **auto-waiting**, reliable locators, and built-in assertions that work seamlessly with dynamic UI updates.
+
+---
+
+## Key Areas to Test
+
+When testing a React application, focus on the following:
+
+- ✅ Dynamic DOM updates
+- ✅ Component rendering
+- ✅ State changes
+- ✅ API requests and responses
+- ✅ Loading spinners
+- ✅ Lazy-loaded components
+- ✅ Form validation
+- ✅ Navigation and routing
+- ✅ Error handling
+- ✅ User interactions (clicks, inputs, dropdowns)
+
+---
+
+## Use Stable Locators
+
+Prefer accessibility-based locators because they are more reliable and less likely to break when the UI changes.
+
+```typescript
+await page.getByRole('button', { name: 'Login' }).click();
+
+await page.getByLabel('Email').fill('user@example.com');
+
+await page.getByTestId('submit-button').click();
+```
+
+---
+
+## Avoid XPath
+
+❌ Avoid XPath whenever possible because React frequently re-renders components, making XPath expressions fragile and difficult to maintain.
+
+```typescript
+// Avoid
+page.locator('//button[@class="btn"]');
+```
+
+Instead, use:
+
+```typescript
+page.getByRole('button', { name: 'Submit' });
+```
+
+---
+
+## Use Playwright's Auto-Waiting
+
+React updates the DOM asynchronously after state changes or API responses. Instead of using hard waits, rely on Playwright's built-in auto-waiting and assertions.
+
+```typescript
+await expect(page.getByText('Welcome')).toBeVisible();
+```
+
+Avoid:
+
+```typescript
+await page.waitForTimeout(5000);
+```
+
+---
+
+## Validate API Calls
+
+Verify that API requests are triggered correctly and the UI updates based on the response.
+
+```typescript
+await page.waitForResponse(response =>
+  response.url().includes('/users') &&
+  response.status() === 200
+);
+```
+
+---
+
+## Test Loading States
+
+Ensure loading indicators appear while data is being fetched and disappear after the response.
+
+```typescript
+await expect(page.getByTestId('loader')).toBeVisible();
+
+await expect(page.getByTestId('loader')).toBeHidden();
+```
+
+---
+
+## Test Lazy Loading
+
+Verify that lazy-loaded components are rendered only when required.
+
+```typescript
+await page.getByRole('button', { name: 'Load More' }).click();
+
+await expect(page.getByText('Additional Content')).toBeVisible();
+```
+
+---
+
+## Best Practices
+
+- ✅ Use accessibility-based locators (`getByRole`, `getByLabel`).
+- ✅ Use `getByTestId()` for elements without accessible attributes.
+- ✅ Avoid XPath whenever possible.
+- ✅ Let Playwright handle synchronization with auto-waiting.
+- ✅ Verify UI updates after state changes.
+- ✅ Test API success and failure scenarios.
+- ✅ Validate loading indicators and error messages.
+- ✅ Write tests from the user's perspective rather than testing React internals.
+
+---
+
+## Interview Tip
+
+> **Prefer accessibility-based locators such as `getByRole()` and `getByLabel()` because they are more stable, improve test reliability, and continue to work even when the UI structure changes.**
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How would you test a React application?*
+
+**Answer:**
+
+> "When testing a React application, I focus on user-facing functionality such as component rendering, dynamic DOM updates, state changes, API interactions, loading indicators, and lazy-loaded components. Since React updates the DOM asynchronously, I rely on Playwright's built-in auto-waiting and assertions instead of hard waits. I prefer accessibility-based locators like `getByRole()` and `getByLabel()`, and use `getByTestId()` when needed, while avoiding XPath because it's more fragile in React applications. I also validate API responses, loading states, and error scenarios to ensure the application behaves correctly from the user's perspective."
+
+# 7. How do you handle Shadow DOM?
+
+Shadow DOM is a web standard that allows developers to encapsulate the HTML, CSS, and JavaScript of a component. It is commonly used in Web Components to prevent styles and DOM structure from leaking outside the component.
+
+Playwright provides built-in support for **Open Shadow DOM**, allowing you to interact with elements inside it without any additional configuration.
+
+---
+
+## Handling Open Shadow DOM
+
+You can chain locators to access elements inside an open shadow root.
+
+```typescript
 await page
-.locator('custom-element')
-.locator('#submit')
-.click();
-or
+  .locator('custom-element')
+  .locator('#submit')
+  .click();
+```
 
-page.locator(
-'custom-element >> button');
-Closed Shadow DOM cannot be accessed directly. In such cases, ask developers to expose test hooks or test the behavior through the public UI.
+---
 
-8. How do you test WebSockets?
-Listen for WebSocket events.
+## Alternative Syntax
+
+Playwright also supports the `>>` selector syntax for traversing into the Shadow DOM.
+
+```typescript
+await page
+  .locator('custom-element >> button')
+  .click();
+```
+
+---
+
+## What to Validate
+
+When testing elements inside a Shadow DOM, verify:
+
+- ✅ Elements are visible and accessible
+- ✅ Buttons, inputs, and links are clickable
+- ✅ User interactions behave correctly
+- ✅ Form inputs accept valid data
+- ✅ Validation messages appear as expected
+- ✅ UI updates correctly after user actions
+
+---
+
+## Closed Shadow DOM
+
+A **Closed Shadow DOM** cannot be accessed directly by automation tools, including Playwright.
+
+In such cases:
+
+- ❌ You cannot inspect or interact with internal elements.
+- ✅ Ask developers to expose **test hooks**, such as:
+  - `data-testid`
+  - Public methods
+  - Test-only APIs
+- ✅ Test the component through its **public UI** and verify the expected behavior instead of accessing internal elements.
+
+---
+
+## Best Practices
+
+- ✅ Prefer Playwright's built-in Shadow DOM support.
+- ✅ Use reliable locators such as `getByRole()` or `getByTestId()` when available.
+- ✅ Avoid relying on internal implementation details.
+- ✅ For Closed Shadow DOM, validate functionality through user-visible behavior.
+- ✅ Collaborate with developers to expose test-friendly hooks if deeper testing is required.
+
+---
+
+# Open vs. Closed Shadow DOM
+
+| Feature | Open Shadow DOM | Closed Shadow DOM |
+|----------|-----------------|-------------------|
+| Accessible by Playwright | ✅ Yes | ❌ No |
+| Can inspect elements | ✅ Yes | ❌ No |
+| Can interact with internal elements | ✅ Yes | ❌ No |
+| Recommended testing approach | Direct interaction | Test via public UI or test hooks |
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How do you handle Shadow DOM in Playwright?*
+
+**Answer:**
+
+> "Playwright has built-in support for **Open Shadow DOM**, so I can interact with elements inside a shadow root using chained locators or the `>>` selector syntax. For example, I locate the shadow host first and then the element inside it. However, **Closed Shadow DOM** is intentionally inaccessible, so automation tools cannot interact with its internal elements. In those cases, I either ask developers to expose test hooks such as `data-testid` or validate the component's behavior through its public UI. This ensures the tests remain reliable without depending on internal implementation details."
+
+# 8. How do you test WebSockets?
+
+WebSockets enable real-time, bidirectional communication between the client and the server. Unlike traditional HTTP requests, a WebSocket connection remains open, allowing data to be sent and received instantly.
+
+In Playwright, you can listen for WebSocket events and validate the messages exchanged between the client and server.
+
+---
+
+## Listen for WebSocket Events
+
+Capture WebSocket connections and monitor the frames being sent and received.
+
+```typescript
+page.on('websocket', ws => {
+  console.log('WebSocket URL:', ws.url());
+
+  ws.on('framesent', data => {
+    console.log('Sent:', data.payload);
+  });
+
+  ws.on('framereceived', data => {
+    console.log('Received:', data.payload);
+  });
+});
+```
+
+---
+
+## What to Validate
+
+When testing WebSockets, verify the following:
+
+- ✅ WebSocket connection is established successfully
+- ✅ Correct messages are sent to the server
+- ✅ Correct messages are received from the server
+- ✅ Message format and payload are correct
+- ✅ Real-time updates are reflected in the UI
+- ✅ Connection is automatically re-established after a disconnect
+- ✅ Error messages are handled gracefully
+- ✅ No unexpected connection closures occur
+
+---
+
+## Example Test Scenario
+
+Suppose you're testing a live chat application:
+
+1. Open the chat application.
+2. Verify the WebSocket connection is established.
+3. Send a chat message.
+4. Validate that the message is sent over the WebSocket.
+5. Verify the server responds with the correct message.
+6. Confirm the message appears in the chat UI.
+
+---
+
+## Example Assertion
+
+```typescript
+let messageReceived = false;
 
 page.on('websocket', ws => {
-console.log(ws.url());
-ws.on('framereceived',
-data=>console.log(data));
-ws.on('framesent',
-data=>console.log(data));
+  ws.on('framereceived', frame => {
+    if (frame.payload.includes('Hello')) {
+      messageReceived = true;
+    }
+  });
 });
-Validate
 
-Connection established
-Correct messages
-Reconnection
-Error handling
-9. How do you verify emails received after registration?
-Preferred options
+await expect.poll(() => messageReceived).toBe(true);
+```
 
-MailSlurp
-MailHog
-Mailtrap
-Gmail API
-Flow
+---
 
+## Common WebSocket Test Cases
+
+- 🔹 Verify successful connection establishment.
+- 🔹 Validate authentication during connection.
+- 🔹 Verify messages are sent and received correctly.
+- 🔹 Validate message payload and format.
+- 🔹 Test server push notifications.
+- 🔹 Verify reconnection after network interruption.
+- 🔹 Test handling of invalid or malformed messages.
+- 🔹 Verify behavior when the server disconnects unexpectedly.
+- 🔹 Ensure multiple users receive real-time updates correctly.
+
+---
+
+## Best Practices
+
+- ✅ Validate both sent and received frames.
+- ✅ Avoid fixed delays; use Playwright's event listeners.
+- ✅ Test network interruptions and automatic reconnection.
+- ✅ Verify UI updates after receiving WebSocket messages.
+- ✅ Check for proper error handling and timeout behavior.
+- ✅ Test under multiple concurrent client connections if applicable.
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How do you test WebSockets in Playwright?*
+
+**Answer:**
+
+> "To test WebSockets in Playwright, I listen for the `websocket` event and monitor the frames being sent and received using the `framesent` and `framereceived` event handlers. I validate that the WebSocket connection is established successfully, the correct messages are exchanged, and the UI updates in real time based on those messages. I also test reconnection scenarios, error handling, and unexpected disconnections to ensure the application behaves reliably under different network conditions."
+
+# 9. How do you verify emails received after registration?
+
+Email verification is a common end-to-end testing scenario in web applications. The goal is to ensure that the application sends the correct email after a user registers and that the email content is accurate.
+
+---
+
+## Common Tools for Email Testing
+
+Some popular tools used to capture and validate emails during automation are:
+
+- 📧 **MailSlurp**
+- 📧 **MailHog**
+- 📧 **Mailtrap**
+- 📧 **Gmail API** (for real Gmail accounts)
+
+---
+
+## Email Verification Flow
+
+```text
 Register User
-↓
+      │
+      ▼
 Wait for Email
-↓
+      │
+      ▼
 Open Email
-↓
+      │
+      ▼
 Validate Subject
-↓
-Validate Body
-↓
-Click Verification Link
-Example
+      │
+      ▼
+Validate Email Body
+      │
+      ▼
+Extract OTP or Verification Link
+      │
+      ▼
+Complete Email Verification
+```
 
-const email =
-await mailSlurp.waitForLatestEmail();
-Validate
+---
 
-Subject
-Sender
-OTP
-Verification link
+## Example Using MailSlurp
+
+Wait for the latest email after registration:
+
+```typescript
+const email = await mailSlurp.waitForLatestEmail(inboxId);
+```
+
+---
+
+## Validations to Perform
+
+After receiving the email, verify the following:
+
+- ✅ Email is received successfully
+- ✅ Sender email address is correct
+- ✅ Recipient email address is correct
+- ✅ Subject line is correct
+- ✅ Email body contains the expected content
+- ✅ OTP is present and correctly formatted
+- ✅ Verification or activation link is present
+- ✅ Link redirects to the correct page
+- ✅ Email is received within the expected time
+
+---
+
+## Example Assertions
+
+```typescript
+expect(email.subject).toBe('Verify Your Account');
+
+expect(email.body).toContain('Welcome');
+
+expect(email.body).toContain('verification');
+
+expect(email.body).toMatch(/https?:\/\/.+/);
+```
+
+---
+
+## If the Email Contains an OTP
+
+Extract and validate the OTP before using it.
+
+```typescript
+const otp = email.body.match(/\d{6}/)?.[0];
+
+expect(otp).toBeTruthy();
+```
+
+---
+
+## If the Email Contains a Verification Link
+
+Extract the link and navigate to it.
+
+```typescript
+const link = email.body.match(/https?:\/\/[^\s]+/)?.[0];
+
+await page.goto(link!);
+
+await expect(page).toHaveURL(/verified/);
+```
+
+---
+
+## Best Practices
+
+- ✅ Use disposable inboxes for automation.
+- ✅ Wait for emails using polling instead of fixed delays.
+- ✅ Validate both the email subject and body.
+- ✅ Verify OTP or activation links.
+- ✅ Ensure emails are received within an acceptable time.
+- ✅ Clean up test inboxes after execution.
+- ✅ Avoid using personal email accounts for automated tests.
+
+---
+
+# Interview Summary (2-Minute Answer)
+
+> **Question:** *How do you verify emails received after registration?*
+
+**Answer:**
+
+> "To verify registration emails, I typically use tools like **MailSlurp**, **MailHog**, **Mailtrap**, or the **Gmail API**, depending on the project requirements. After registering a user, I wait for the email to arrive, then validate the sender, recipient, subject, and email body. If the email contains an OTP, I extract and verify it. If it contains a verification link, I navigate to the link and confirm that the account is successfully activated. I also ensure the email is delivered within the expected time and use disposable inboxes to keep the tests isolated and reliable."
+
 # 10. How do you debug a flaky Playwright test?
 
 Debugging flaky tests requires a systematic approach to identify the root cause instead of simply adding retries. Below is the step-by-step process I follow.
