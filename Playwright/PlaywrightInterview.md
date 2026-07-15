@@ -244,59 +244,65 @@ Mention:
 - CI/CD
 - Logger
 # 32. How do you manage test data?
-JSON
-CSV
-Excel
-Environment files
-33. How do you execute different environments?
+- JSON
+- CSV
+- Excel
+- Environment files
+# 33. How do you execute different environments?
 Using
-
+```bash
 .env.dev
 .env.qa
 .env.stage
 .env.prod
-34. Which reports have you used?
-HTML
-Allure
-JSON
-JUnit
-35. CI/CD integration?
-Jenkins
-GitHub Actions
-Azure DevOps
-36. How do you handle flaky tests?
-Stable locators
-Auto waits
-Retry
-Network mocking
-Proper assertions
-37. Difference between Fixtures and Hooks?
+```
+# 34. Which reports have you used?
+- HTML
+- Allure
+- JSON
+- JUnit
+# 35. CI/CD integration?
+- Jenkins
+- GitHub Actions
+- Azure DevOps
+# 36. How do you handle flaky tests?
+- Stable locators
+- Auto waits
+- Retry
+- Network mocking
+- Proper assertions
+# 37. Difference between Fixtures and Hooks?
 Hooks
-
+```typescript
 beforeEach()
 afterEach()
+```
 Fixtures
-
 Become a Medium member
 Reusable objects shared across tests.
 
-38. Explain test.describe().
+# 38. Explain test.describe().
 Groups related test cases.
 
-39. Explain test.step().
+# 39. Explain test.step().
 Improves reporting.
 
-40. Soft Assertion
+# 40. Soft Assertion
+```typescript
 await expect.soft(locator)
 .toBeVisible();
+```
 Execution continues even if the assertion fails.
 
-Coding Questions
-Reverse string
+## Coding Questions
+# Reverse string
+```typescript 
 function reverse(str){
 return str.split('').reverse().join('');
 }
-Find duplicate array elements
+```
+# Find duplicate array elements
+```typescript
 const arr=[1,2,2,3,4,4];
 const dup=arr.filter(
 (item,index)=>
@@ -311,6 +317,7 @@ Remove duplicates
 [...new Set(arr)]
 Sort numbers
 arr.sort((a,b)=>a-b);
+```
 # Scenario-Based Playwright Interview Questions
 
 1. **How would you automate OTP login?**
